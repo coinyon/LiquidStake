@@ -5,13 +5,23 @@
 from vyper.interfaces import ERC721
 from vyper.interfaces import ERC20
 
+struct Stake:
+  stakeId: uint256 # uint40
+  stakedHearts: uint256 # uint72
+  stakeShares: uint256 # uint72
+  lockedDay: uint256 # uint16
+  stakedDays: uint256 # uint16
+  unlockedDay: uint256 # uint16
+  isAutoStake: bool
+
 interface HEX:
   def stake(amt: uint256) -> uint256: nonpayable
   def transfer(_to : address, _value : uint256) -> bool: nonpayable
   def transferFrom(_from : address, _to : address, _value : uint256) -> bool: nonpayable
+  def stakeCount(_for: address) -> uint256: nonpayable
   def stakeStart(newStakedHearts: uint256, newStakedDays: uint256): nonpayable
+  def stakeLists(addr: address, index: uint256) -> Stake: nonpayable
   #def stakeEnd(stakeIndex: uint256, stakeIdParam: uint40) -> void: nonpayable)
-
 
 implements: ERC721
 
@@ -334,13 +344,17 @@ def setApprovalForAll(_operator: address, _approved: bool):
 ### MINT & BURN FUNCTIONS ###
 
 @external
-def stake(amt: uint256, days: uint256) -> bool:
+def stake(amt: uint256, days: uint256):
     self.hex.transferFrom(msg.sender, self, amt)
     self.hex.stakeStart(amt, days)
-    _tokenId: uint256 = 1
+    stake_length: uint256 = self.hex.stakeCount(self)
+    assert stake_length > 0
+    stake: Stake = self.hex.stakeLists(self, stake_length - 1)
+
+    _tokenId: uint256 = stake.stakeId
     self._addTokenTo(msg.sender, _tokenId)
+
     log Transfer(ZERO_ADDRESS, msg.sender, _tokenId)
-    return True
 
 
 @external

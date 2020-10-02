@@ -23,4 +23,12 @@ def test_balance(mockhex_contract, accounts):
 def test_stake(mockhex_contract, liquidstake_contract, accounts):
     mockhex_contract.approve(liquidstake_contract, 100 * 1e8, {'from': accounts[0]})
     nft = liquidstake_contract.stake(100 * 1e8, 365)
-    #assert mockhex_contract.storedData() == INITIAL_VALUE
+    liquidstake_contract.unstake(nft)
+
+
+def test_two_stakes(mockhex_contract, liquidstake_contract, accounts):
+    mockhex_contract.approve(liquidstake_contract, 100 * 1e8, {'from': accounts[0]})
+    nft1 = liquidstake_contract.stake(100 * 1e8, 365)
+    nft2 = liquidstake_contract.stake(100 * 1e8, 365)
+    liquidstake_contract.unstake(nft1)
+    liquidstake_contract.unstake(nft2)
