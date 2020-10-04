@@ -6,13 +6,15 @@ from vyper.interfaces import ERC721
 from vyper.interfaces import ERC20
 
 struct Stake:
-  stakeId: uint256 # uint40
-  stakedHearts: uint256 # uint72
-  stakeShares: uint256 # uint72
-  lockedDay: uint256 # uint16
-  stakedDays: uint256 # uint16
-  unlockedDay: uint256 # uint16
-  isAutoStake: bool
+  packed: bytes32
+  # vyper does not support smaller integer denominations yet
+  #stakeId: uint40
+  #stakedHearts: uint72
+  #stakeShares: uint72
+  #lockedDay: uint16
+  #stakedDays: uint16
+  #unlockedDay: uint16
+  #isAutoStake: bool
 
 interface HEX:
   def stake(amt: uint256) -> uint256: nonpayable
@@ -350,11 +352,9 @@ def stake(amt: uint256, days: uint256):
     stake_length: uint256 = self.hex.stakeCount(self)
     assert stake_length > 0
     stake: Stake = self.hex.stakeLists(self, stake_length - 1)
-
-    _tokenId: uint256 = stake.stakeId
-    self._addTokenTo(msg.sender, _tokenId)
-
-    log Transfer(ZERO_ADDRESS, msg.sender, _tokenId)
+    stakeId: uint256 = convert(slice(stake.packed, 0, 5), uint256) # 40 bits
+    self._addTokenTo(msg.sender, stakeId)
+    log Transfer(ZERO_ADDRESS, msg.sender, stakeId)
 
 
 @external
