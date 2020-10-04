@@ -7,7 +7,7 @@ from vyper.interfaces import ERC20
 
 struct Stake:
   packed: bytes32
-  # vyper does not support smaller integer denominations yet
+  # vyper does not support smaller integers yet
   #stakeId: uint40
   #stakedHearts: uint72
   #stakeShares: uint72
@@ -351,8 +351,9 @@ def stake(amt: uint256, days: uint256):
     self.hex.stakeStart(amt, days)
     stake_length: uint256 = self.hex.stakeCount(self)
     assert stake_length > 0
-    stake: Stake = self.hex.stakeLists(self, stake_length - 1)
-    stakeId: uint256 = convert(slice(stake.packed, 0, 5), uint256) # 40 bits
+    #stake: Stake = self.hex.stakeLists(self, stake_length - 1)
+    #stakeId: uint256 = convert(slice(stake.packed, 0, 5), uint256) # 40 bits
+    stakeId: uint256 = stake_length - 1
     self._addTokenTo(msg.sender, stakeId)
     log Transfer(ZERO_ADDRESS, msg.sender, stakeId)
 

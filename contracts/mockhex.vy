@@ -29,6 +29,7 @@ balanceOf: public(HashMap[address, uint256])
 allowances: HashMap[address, HashMap[address, uint256]]
 total_supply: uint256
 minter: address
+_stakeCount: uint256
 
 
 @external
@@ -40,6 +41,7 @@ def __init__(_supply: uint256):
     self.balanceOf[msg.sender] = init_supply
     self.total_supply = init_supply
     self.minter = msg.sender
+    self._stakeCount = 0
     log Transfer(ZERO_ADDRESS, msg.sender, init_supply)
 
 
@@ -165,5 +167,11 @@ def burnFrom(_to: address, _value: uint256):
 
 
 @external
+def stakeCount(addr: address) -> uint256:
+    return self._stakeCount
+
+
+@external
 def stakeStart(newStakedHearts: uint256, newStakedDays: uint256):
     self._burn(msg.sender, newStakedHearts)
+    self._stakeCount += 1
