@@ -3,7 +3,6 @@
 # @author Ryuya Nakamura (@nrryuya)
 # Modified from: https://github.com/vyperlang/vyper/blob/de74722bf2d8718cca46902be165f9fe0e3641dd/examples/tokens/ERC721.vy
 from vyper.interfaces import ERC721
-from vyper.interfaces import ERC20
 
 struct Stake:
   packed: bytes32
@@ -353,7 +352,7 @@ def stake(amt: uint256, days: uint256):
     assert stake_length > 0
     #stake: Stake = self.hex.stakeLists(self, stake_length - 1)
     #stakeId: uint256 = convert(slice(stake.packed, 0, 5), uint256) # 40 bits
-    stakeId: uint256 = stake_length - 1
+    stakeId: uint256 = stake_length
     self._addTokenTo(msg.sender, stakeId)
     log Transfer(ZERO_ADDRESS, msg.sender, stakeId)
 
@@ -375,4 +374,3 @@ def endStake(_tokenId: uint256):
     self._clearApproval(owner, _tokenId)
     self._removeTokenFrom(owner, _tokenId)
     log Transfer(owner, ZERO_ADDRESS, _tokenId)
-
