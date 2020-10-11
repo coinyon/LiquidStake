@@ -3,17 +3,16 @@ import math
 
 HEX_SUPPLY = 4000
 
+@pytest.fixture
+def mockhex_contract(mockhex, accounts):
+    # deploy the contract with the initial value as a constructor argument
+    yield mockhex.deploy(HEX_SUPPLY, {'from': accounts[0]})
+
 
 @pytest.fixture
 def liquidstake_contract(liquidstake, mockhex_contract, accounts):
     # deploy the contract with the initial value as a constructor argument
     yield liquidstake.deploy(mockhex_contract, {'from': accounts[0]})
-
-
-@pytest.fixture
-def mockhex_contract(mockhex, accounts):
-    # deploy the contract with the initial value as a constructor argument
-    yield mockhex.deploy(HEX_SUPPLY, {'from': accounts[0]})
 
 
 def test_balance(mockhex_contract, accounts):
