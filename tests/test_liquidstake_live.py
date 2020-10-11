@@ -1,6 +1,7 @@
-import pytest
-import brownie
 import math
+
+import brownie
+import pytest
 
 
 @pytest.fixture
