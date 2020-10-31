@@ -43,14 +43,14 @@ def test_buy_and_stake_hex(hex_contract, uniswap_v1_hex, liquidstake_contract, a
         }
     )
 
-    # Stake 100 HEX
+    # Stake all the HEX
     assert hex_contract.balanceOf(accounts[0]) > 0
     amt = hex_contract.balanceOf(accounts[0])
     hex_contract.approve(liquidstake_contract, amt, {'from': accounts[0]})
     stakeTx = liquidstake_contract.stake(amt, 365, {'from': accounts[0]})
 
     # Here we count 3 Transfers:
-    # - HEX to LS
+    # - HEX to LiquidStake
     # - HEX to Staking
     # - NFT to accounts[0]
     assert len(stakeTx.events['Transfer']) == 3
@@ -63,5 +63,6 @@ def test_buy_and_stake_hex(hex_contract, uniswap_v1_hex, liquidstake_contract, a
     assert hex_contract.balanceOf(accounts[0]) == 0
     assert liquidstake_contract.ownerOf(stakeId) == accounts[0]
 
-    liquidstake_contract.endStake(stakeId)
-    # assert hex_contract.balanceOf(accounts[0]) > 0
+    unstakeTx = liquidstake_contract.endStake(stakeId, {'from': accounts[0]})
+    #import ipdb; ipdb.set_trace()
+    #assert hex_contract.balanceOf(accounts[0]) > 0

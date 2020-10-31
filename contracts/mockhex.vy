@@ -178,5 +178,12 @@ def stakeStart(newStakedHearts: uint256, newStakedDays: uint256):
 
 
 @external
+def stakeEnd(stakeIndex: uint256, stakeIdParam: uint256):
+    self.total_supply += 1
+    self.balanceOf[msg.sender] += 1
+    log Transfer(ZERO_ADDRESS, msg.sender, 1)
+
+
+@external
 def stakeLists(addr: address, index: uint256) -> uint256:
     return self._stakeCount

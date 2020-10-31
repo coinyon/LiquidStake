@@ -15,13 +15,13 @@ from vyper.interfaces import ERC721
   #isAutoStake: bool
 
 interface HEX:
-  def stake(amt: uint256) -> uint256: nonpayable
   def transfer(_to : address, _value : uint256) -> bool: nonpayable
   def transferFrom(_from : address, _to : address, _value : uint256) -> bool: nonpayable
   def stakeCount(_for: address) -> uint256: nonpayable
   def stakeStart(newStakedHearts: uint256, newStakedDays: uint256): nonpayable
   def stakeLists(addr: address, index: uint256) -> uint256: nonpayable
-  #def stakeEnd(stakeIndex: uint256, stakeIdParam: uint40) -> void: nonpayable)
+  # stakeIdParam is uint40 originally
+  def stakeEnd(stakeIndex: uint256, stakeIdParam: uint256): nonpayable
 
 implements: ERC721
 
@@ -369,7 +369,9 @@ def endStake(_tokenId: uint256):
     assert self._isApprovedOrOwner(msg.sender, _tokenId)
     owner: address = self.idToOwner[_tokenId]
     # Throws if `_tokenId` is not a valid NFT
+    self.hex.stakeEnd(0, _tokenId)
     assert owner != ZERO_ADDRESS
     self._clearApproval(owner, _tokenId)
     self._removeTokenFrom(owner, _tokenId)
     log Transfer(owner, ZERO_ADDRESS, _tokenId)
+
