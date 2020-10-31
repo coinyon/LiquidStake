@@ -4,8 +4,7 @@
 # Modified from: https://github.com/vyperlang/vyper/blob/de74722bf2d8718cca46902be165f9fe0e3641dd/examples/tokens/ERC721.vy
 from vyper.interfaces import ERC721
 
-struct Stake:
-  packed: bytes32
+#struct Stake:
   # vyper does not support smaller integers yet
   #stakeId: uint40
   #stakedHearts: uint72
@@ -21,7 +20,7 @@ interface HEX:
   def transferFrom(_from : address, _to : address, _value : uint256) -> bool: nonpayable
   def stakeCount(_for: address) -> uint256: nonpayable
   def stakeStart(newStakedHearts: uint256, newStakedDays: uint256): nonpayable
-  def stakeLists(addr: address, index: uint256) -> Stake: nonpayable
+  def stakeLists(addr: address, index: uint256) -> uint256: nonpayable
   #def stakeEnd(stakeIndex: uint256, stakeIdParam: uint40) -> void: nonpayable)
 
 implements: ERC721
@@ -350,9 +349,9 @@ def stake(amt: uint256, days: uint256):
     self.hex.stakeStart(amt, days)
     stake_length: uint256 = self.hex.stakeCount(self)
     assert stake_length > 0
-    #stake: Stake = self.hex.stakeLists(self, stake_length - 1)
-    #stakeId: uint256 = convert(slice(stake.packed, 0, 5), uint256) # 40 bits
-    stakeId: uint256 = stake_length
+    stakeId: uint256 = self.hex.stakeLists(self, stake_length - 1)
+    #stakeId: uint256 = convert(slice(stakeBytes, 0, 10), uint256) # 40 bits
+    #stakeId: uint256 = stake_length
     self._addTokenTo(msg.sender, stakeId)
     log Transfer(ZERO_ADDRESS, msg.sender, stakeId)
 
