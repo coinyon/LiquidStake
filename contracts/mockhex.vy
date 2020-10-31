@@ -175,3 +175,8 @@ def stakeCount(addr: address) -> uint256:
 def stakeStart(newStakedHearts: uint256, newStakedDays: uint256):
     self._burn(msg.sender, newStakedHearts)
     self._stakeCount += 1
+
+
+@external
+def stakeLists(addr: address, index: uint256) -> uint256:
+    return self._stakeCount
