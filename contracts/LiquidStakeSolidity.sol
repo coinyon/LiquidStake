@@ -4,6 +4,7 @@ import 'OpenZeppelin/openzeppelin-contracts@3.0.0/contracts/token/ERC721/ERC721.
 
 import 'interfaces/IHEX.sol';
 import 'interfaces/IStakingRewards.sol';
+import 'interfaces/IRewardDistributionRecipient.sol';
 
 contract LiquidStakeSolidity is ERC721 {
     IHEX hex_contract;
@@ -53,6 +54,6 @@ contract LiquidStakeSolidity is ERC721 {
     {
        uint256 amt = hex_contract.balanceOf(address(this));
        hex_contract.transfer(rewards, amt);
-       IStakingRewards(rewards).notifyRewardAmount(amt);
+       IRewardDistributionRecipient(rewards).notifyRewardAmount(amt);
     }
 }
