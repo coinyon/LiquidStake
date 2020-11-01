@@ -4,9 +4,9 @@ import math
 HEX_SUPPLY = 4000
 
 @pytest.fixture
-def mockhex_contract(mockhex, accounts):
+def mockhex_contract(MockHEX, accounts):
     # deploy the contract with the initial value as a constructor argument
-    yield mockhex.deploy(HEX_SUPPLY, {'from': accounts[0]})
+    yield MockHEX.deploy(HEX_SUPPLY, {'from': accounts[0]})
 
 
 @pytest.fixture
