@@ -24,6 +24,19 @@ contract LiquidStakeSolidity is ERC721 {
         if (msg.sender == owner) _;
     }
 
+    function getStakeIndex(uint256 _stakeId) public view returns (uint40) {
+        uint256 stakeCount = hex_contract.stakeCount(address(this));
+        for (uint40 i = 0; i < stakeCount; i++) {
+          (uint40 stakeId, uint72 stakedHearts, uint72 stakeShares, uint16
+           lockedDay, uint16 stakedDays, uint16 unlockedDay, bool isAutoStake) =
+             hex_contract.stakeLists(address(this), i);
+          if (stakeId == _stakeId) {
+            return i;
+          }
+        }
+        require(false);
+    }
+
     function stake(uint256 newStakedHearts, uint256 newStakedDays)
         external
     {
