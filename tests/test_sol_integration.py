@@ -67,5 +67,10 @@ def test_buy_and_stake_hex(hex_contract, uniswap_v1_hex, liquidstake_contract, a
     assert liquidstake_contract.ownerOf(stakeId) == accounts[0]
 
     unstakeTx = liquidstake_contract.endStake(0, stakeId, {'from': accounts[0]})
-    #import ipdb; ipdb.set_trace()
-    #assert hex_contract.balanceOf(accounts[0]) > 0
+    assert len(unstakeTx.events['Transfer']) >= 3
+    assert len(unstakeTx.events['StakeEnd']) == 1
+
+    # We got some HEX after endstaking!
+    assert hex_contract.balanceOf(accounts[0]) > 0
+    with brownie.reverts('ERC721: owner query for nonexistent token'):
+        liquidstake_contract.ownerOf(stakeId)
