@@ -1,23 +1,22 @@
 pragma solidity ^0.6.6;
 
 import 'OpenZeppelin/openzeppelin-contracts@3.0.0/contracts/token/ERC721/ERC721.sol';
-// import "OpenZeppelin/openzeppelin-contracts@3.0.0/contracts/math/SafeMath.sol";
-
 
 import 'interfaces/IHEX.sol';
+import 'interfaces/IStakingRewards.sol';
 
 contract LiquidStakeSolidity is ERC721 {
     IHEX hex_contract;
-    address immutable origin;
+    address immutable rewards;
     address immutable owner;
 
-    constructor(string memory name, string memory symbol, address hex_address, address origin_address)
+    constructor(string memory name, string memory symbol, address hex_address, address rewards_address)
         ERC721(name, symbol)
         public
     {
         hex_contract = IHEX(hex_address);
         owner = msg.sender;
-        origin = origin_address;
+        rewards = rewards_address;
     }
 
     modifier restricted() {
@@ -46,8 +45,14 @@ contract LiquidStakeSolidity is ERC721 {
         uint256 hexAmountPost = hex_contract.balanceOf(address(this));
         uint256 stakeReturn = hexAmountPost - hexAmountPre;
         uint256 fee = stakeReturn / 2000; // 0.05 %
-        hex_contract.transfer(origin, fee);
         hex_contract.transfer(msg.sender, stakeReturn - fee);
         _burn(uint256(stakeIdParam));
+    }
+
+    function pushRewards() external
+    {
+       uint256 amt = hex_contract.balanceOf(address(this));
+       hex_contract.transfer(rewards, amt);
+       IStakingRewards(rewards).notifyRewardAmount(amt);
     }
 }
