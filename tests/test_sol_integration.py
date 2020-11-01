@@ -16,16 +16,19 @@ def uniswap_v1_hex(Contract):
 
 
 @pytest.fixture(scope="session")
-def liquidstake_contract(liquidstake, hex_contract, accounts):
+def liquidstake_contract(LiquidStakeSolidity, hex_contract, accounts):
     # deploy the contract with the original hex contract as a constructor argument
-    yield liquidstake.deploy(hex_contract, {'from': accounts[0]})
-
-
-def test_balance(hex_contract, accounts):
-    assert hex_contract.balanceOf(accounts[0]) == 0
+    yield LiquidStakeSolidity.deploy(
+            "LiquidStake",
+            "LS",
+            hex_contract,
+            hex_contract,
+            {'from': accounts[0]}
+        )
 
 
 def test_stake_without_any_hex(hex_contract, liquidstake_contract, accounts):
+    hex_contract.transfer(hex_contract, hex_contract.balanceOf(accounts[0]), {'from': accounts[0]})
     assert hex_contract.balanceOf(accounts[0]) == 0
     hex_contract.approve(liquidstake_contract, 100 * 1e8, {'from': accounts[0]})
     with brownie.reverts():
@@ -63,6 +66,6 @@ def test_buy_and_stake_hex(hex_contract, uniswap_v1_hex, liquidstake_contract, a
     assert hex_contract.balanceOf(accounts[0]) == 0
     assert liquidstake_contract.ownerOf(stakeId) == accounts[0]
 
-    unstakeTx = liquidstake_contract.endStake(stakeId, {'from': accounts[0]})
+    unstakeTx = liquidstake_contract.endStake(0, stakeId, {'from': accounts[0]})
     #import ipdb; ipdb.set_trace()
     #assert hex_contract.balanceOf(accounts[0]) > 0

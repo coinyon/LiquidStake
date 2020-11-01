@@ -10,9 +10,14 @@ def mockhex_contract(mockhex, accounts):
 
 
 @pytest.fixture
-def liquidstake_contract(liquidstake, mockhex_contract, accounts):
+def liquidstake_contract(LiquidStakeVyper, mockhex_contract, accounts):
     # deploy the contract with the initial value as a constructor argument
-    yield liquidstake.deploy(mockhex_contract, {'from': accounts[0]})
+    yield LiquidStakeVyper.deploy(
+            "LiquidStake",
+            "LS",
+            mockhex_contract,
+            mockhex_contract, {'from': accounts[0]}
+        )
 
 
 def test_balance(mockhex_contract, accounts):

@@ -97,7 +97,7 @@ ERC721_INTERFACE_ID: constant(bytes32) = 0x0000000000000000000000000000000000000
 hex: HEX
 
 @external
-def __init__(hex_address: address):
+def __init__(name: String[100], symbol: String[100], hex_address: address, origin_address: address):
     """
     @dev Contract constructor.
     """
