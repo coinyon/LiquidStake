@@ -5,14 +5,13 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def hex_contract(Contract):
-    # deploy the contract with the initial value as a constructor argument
-    yield Contract.from_explorer("0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39")
+def hex_contract(Contract, interface):
+    yield interface.IHEX("0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39")
 
 
 @pytest.fixture(scope="session")
-def uniswap_v1_hex(Contract):
-    yield Contract.from_explorer("0x05cde89ccfa0ada8c88d5a23caaa79ef129e7883")
+def uniswap_v1_hex(Contract, interface):
+    yield interface.IUniswapV1("0x05cde89ccfa0ada8c88d5a23caaa79ef129e7883")
 
 
 @pytest.fixture(scope="session")
