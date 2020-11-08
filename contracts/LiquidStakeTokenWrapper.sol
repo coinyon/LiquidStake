@@ -7,7 +7,7 @@ import 'OpenZeppelin/openzeppelin-contracts@2.3.0/contracts/token/ERC20/SafeERC2
 
 
 contract LiquidStakeTokenWrapper {
-  
+
     using SafeMath for uint256;
 
     ERC721 public wrappedNFT;

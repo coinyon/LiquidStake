@@ -41,14 +41,26 @@ def liquidstake_contract(LiquidStakeSolidity, hex_contract, rewards_contract, ac
 
 
 @pytest.fixture(scope="session")
-def pool_mining_contract(LiquidStakePool, hex_contract, liquidstake_contract, accounts):
-    yield LiquidStakePool.deploy(
-            accounts[0],
-            hex_contract,
-            hex_contract,
+def dao_contract(LiquidStakeDAO, hex_contract, liquidstake_contract, accounts):
+    yield LiquidStakeDAO.deploy("LiquidStakeDAO", "LSD", {'from': accounts[5]})
+
+
+@pytest.fixture(scope="session")
+def pool_mining_contract(LiquidStakePool, hex_contract, dao_contract, liquidstake_contract, accounts):
+    pool = LiquidStakePool.deploy(
+            accounts[5],
+            accounts[5],
+            dao_contract,
             liquidstake_contract,
-            {'from': accounts[0]}
+            {'from': accounts[5]}
         )
+    totalSupply = dao_contract.balanceOf(accounts[5])
+    assert totalSupply > 0
+    dao_contract.transfer(pool, totalSupply, {'from': accounts[5]})
+    pool.notifyRewardAmount(totalSupply, {'from': accounts[5]})
+    leftover = dao_contract.balanceOf(accounts[5])
+    assert leftover == 0
+    yield pool
 
 
 def empty_account(erc20, account):
@@ -115,7 +127,7 @@ def test_transfer_and_push_rewards(hex_contract, uniswap_v1_hex, liquidstake_con
     assert hex_contract.balanceOf(rewards_contract) > 0
 
 
-def test_stake_earn_pool_token(hex_contract, uniswap_v1_hex, liquidstake_contract, rewards_contract, pool_mining_contract, accounts):
+def test_stake_earn_pool_token(hex_contract, uniswap_v1_hex, liquidstake_contract, rewards_contract, pool_mining_contract, accounts, chain):
     "Alice will stake her LiquidStake to earn some pool tokens"
 
     alice = accounts[1]
@@ -152,3 +164,11 @@ def test_stake_earn_pool_token(hex_contract, uniswap_v1_hex, liquidstake_contrac
     pool_mining_contract.stake(stakeId, {'from': alice})
 
     assert liquidstake_contract.ownerOf(stakeId) == pool_mining_contract
+    earned_initial = pool_mining_contract.earned(alice)
+
+    chain.mine(25)
+
+    earned_later = pool_mining_contract.earned(alice)
+
+    # We should have earned some
+    assert earned_later > earned_initial
