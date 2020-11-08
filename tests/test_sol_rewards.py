@@ -126,7 +126,9 @@ def test_transfer_and_push_rewards(hex_contract, uniswap_v1_hex, liquidstake_con
     assert hex_contract.balanceOf(rewards_contract) > 0
 
 
-def test_stake_earn_pool_token(hex_contract, uniswap_v1_hex, liquidstake_contract, rewards_contract, pool_mining_contract, accounts, chain):
+def test_stake_earn_pool_token(hex_contract, uniswap_v1_hex,
+        liquidstake_contract, rewards_contract, pool_mining_contract, accounts,
+        dao_contract, chain):
     "Alice will stake her LiquidStake to earn some pool tokens"
 
     alice = accounts[1]
@@ -171,3 +173,7 @@ def test_stake_earn_pool_token(hex_contract, uniswap_v1_hex, liquidstake_contrac
 
     # We should have earned some
     assert earned_later > earned_initial
+
+    assert dao_contract.balanceOf(alice) == 0
+    pool_mining_contract.getReward({'from': alice})
+    assert dao_contract.balanceOf(alice) > 0

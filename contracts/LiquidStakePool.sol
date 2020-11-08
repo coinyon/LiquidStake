@@ -41,7 +41,7 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         rewardsDistribution = _rewardsDistribution;
         wrappedNFT = ERC721(_stakingToken);
     }
-
+/*
     function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
     }
@@ -56,9 +56,11 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
             );
     }
 
+  */  /*
     function earned(address account) public view returns (uint256) {
         return _balances[account].mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e18).add(rewards[account]);
     }
+    */
 
     function getRewardForDuration() external view returns (uint256) {
         return rewardRate.mul(rewardsDuration);
@@ -80,7 +82,7 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         stakingToken.safeTransfer(msg.sender, amount);
         emit Withdrawn(msg.sender, amount);
     }
-    */
+
 
     function getReward() public nonReentrant updateReward(msg.sender) {
         uint256 reward = rewards[msg.sender];
@@ -96,6 +98,7 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         getReward();
     }
 
+    */
     function notifyRewardAmount(uint256 reward) external onlyRewardsDistribution updateReward(address(0)) {
         if (block.timestamp >= periodFinish) {
             rewardRate = reward.div(rewardsDuration);
@@ -137,7 +140,7 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         rewardsDuration = _rewardsDuration;
         emit RewardsDurationUpdated(rewardsDuration);
     }
-
+/*
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
         lastUpdateTime = lastTimeRewardApplicable();
@@ -147,7 +150,7 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         }
         _;
     }
-
+*/
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
@@ -185,7 +188,6 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
     event WithdrawnAll(address indexed user);
     //event RewardPaid(address indexed user, uint256 reward);
 
-    /*
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
         lastUpdateTime = lastTimeRewardApplicable();
@@ -222,7 +224,6 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
                 .div(1e18)
                 .add(rewards[account]);
     }
-    */
 
     // stake visibility is public as overriding LiquidStakeTokenWrapper's stake() function
     function stake(uint256 tokenId) public updateReward(msg.sender) checkhalve checkStart{ 
@@ -259,7 +260,6 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         super.withdrawAll();
         emit WithdrawnAll(msg.sender);
     }
-    /*
 
     function exit() external {
         withdrawAll();
@@ -270,12 +270,11 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            // TODO safe.safeTransfer(msg.sender, reward);
+            rewardsToken.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
 
-    */
     modifier checkhalve(){
         if (block.timestamp >= periodFinish) {
             initreward = initreward.mul(50).div(100); 
