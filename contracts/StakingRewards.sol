@@ -45,6 +45,10 @@ contract StakingRewards is IStakingRewards, RewardsDistributionRecipient, Reentr
         rewardsDistribution = _rewardsDistribution;
     }
 
+    function setStakingToken(address _stakingToken) external onlyOwner {
+        stakingToken = IERC20(_stakingToken);
+    }
+
     /* ========== VIEWS ========== */
 
     function totalSupply() external view returns (uint256) {
