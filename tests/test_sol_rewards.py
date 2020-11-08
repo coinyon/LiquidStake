@@ -40,13 +40,24 @@ def liquidstake_contract(LiquidStakeSolidity, hex_contract, rewards_contract, ac
     yield liquidstake
 
 
+@pytest.fixture(scope="session")
+def pool_mining_contract(LiquidStakePool, hex_contract, liquidstake_contract, accounts):
+    yield LiquidStakePool.deploy(
+            accounts[0],
+            hex_contract,
+            hex_contract,
+            liquidstake_contract,
+            {'from': accounts[0]}
+        )
+
+
 def empty_account(erc20, account):
     if erc20.balanceOf(account) > 0:
         erc20.transfer(erc20, erc20.balanceOf(account), {'from': account})
     assert erc20.balanceOf(account) == 0
 
 
-def test_retrieve_rewards(hex_contract, uniswap_v1_hex, liquidstake_contract, rewards_contract, accounts):
+def test_transfer_and_push_rewards(hex_contract, uniswap_v1_hex, liquidstake_contract, rewards_contract, accounts):
     "Will stake for accounts[1] and endStake for accounts[2]"
 
     alice = accounts[1]
@@ -102,3 +113,42 @@ def test_retrieve_rewards(hex_contract, uniswap_v1_hex, liquidstake_contract, re
     assert hex_contract.balanceOf(rewards_contract) == 0
     liquidstake_contract.pushRewards()
     assert hex_contract.balanceOf(rewards_contract) > 0
+
+
+def test_stake_earn_pool_token(hex_contract, uniswap_v1_hex, liquidstake_contract, rewards_contract, pool_mining_contract, accounts):
+    "Alice will stake her LiquidStake to earn some pool tokens"
+
+    alice = accounts[1]
+    bob = accounts[2]
+
+    # Poor bob does not have HEX
+    empty_account(hex_contract, bob)
+
+    # Buy at least 100 HEX (in the future we might need to use uniswap V2 here)
+    uniswap_v1_hex.ethToTokenSwapInput(
+        100 * 1e8,  # minimum amount of tokens to purchase
+        9999999999,  # timestamp
+        {
+            "from": alice,
+            "value": "1 ether"
+        }
+    )
+
+    # Stake all the HEX
+    assert hex_contract.balanceOf(alice) > 0
+    amt = hex_contract.balanceOf(alice)
+    hex_contract.approve(liquidstake_contract, amt, {'from': alice})
+    stakeTx = liquidstake_contract.stake(amt, 365, {'from': alice})
+
+    assert len(stakeTx.events['Transfer']) == 3
+    assert len(stakeTx.events['StakeStart']) == 1
+
+    stakeId = stakeTx.events['Transfer'][2]['tokenId']
+    assert stakeId == stakeTx.events['StakeStart'][0]['stakeId']
+
+    assert liquidstake_contract.ownerOf(stakeId) == alice
+
+    liquidstake_contract.approve(pool_mining_contract, stakeId, {'from': alice})
+    pool_mining_contract.stake(stakeId, {'from': alice})
+
+    assert liquidstake_contract.ownerOf(stakeId) == pool_mining_contract
