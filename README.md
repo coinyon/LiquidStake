@@ -16,4 +16,4 @@ Liquid (transferable) stakes for HEX with shared reward pool.
 
 Run tests like this:
 
-  brownie test --network mainnet-fork
+    brownie test --network mainnet-fork
