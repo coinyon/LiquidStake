@@ -56,10 +56,12 @@ def test_buy_and_stake_hex(hex_contract, uniswap_v1_hex, liquidstake_contract, a
     # - HEX to LiquidStake
     # - HEX to Staking
     # - NFT to accounts[0]
-    assert len(stakeTx.events['Transfer']) == 3
+    assert len(stakeTx.events['Transfer']) >= 3
     assert len(stakeTx.events['StakeStart']) == 1
 
-    stakeId = stakeTx.events['Transfer'][2]['tokenId']
+    for transfer in stakeTx.events['Transfer']:
+        if 'tokenId' in transfer:
+            stakeId = transfer['tokenId']
     assert stakeId == stakeTx.events['StakeStart'][0]['stakeId']
 
     # We got no HEX anymore
