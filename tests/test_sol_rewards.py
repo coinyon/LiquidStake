@@ -109,12 +109,14 @@ def test_transfer_and_push_rewards(hex_contract, uniswap_v1_hex, liquidstake_con
     liquidstake_contract.transferFrom(alice, bob, stakeId, {'from': alice})
     assert liquidstake_contract.ownerOf(stakeId) == bob
 
+    stakeIndex = liquidstake_contract.getStakeIndex(stakeId)
+
     with brownie.reverts():
         # alice can no longer endstake
-        unstakeTx = liquidstake_contract.endStake(0, stakeId, {'from': alice})
+        unstakeTx = liquidstake_contract.endStake(stakeIndex, stakeId, {'from': alice})
 
     # but bob can!
-    unstakeTx = liquidstake_contract.endStake(0, stakeId, {'from': bob})
+    unstakeTx = liquidstake_contract.endStake(stakeIndex, stakeId, {'from': bob})
     assert len(unstakeTx.events['Transfer']) >= 3
     assert len(unstakeTx.events['StakeEnd']) == 1
 
@@ -246,10 +248,19 @@ def test_stake_earn_pool_token_exit(hex_contract, uniswap_v1_hex,
     # Alice will send the NFT to bob
     liquidstake_contract.transferFrom(alice, bob, stakeId, {'from': alice})
     assert liquidstake_contract.ownerOf(stakeId) == bob
-    #assert rewards_contract.earned(alice) == 0
+    # assert rewards_contract.earned(alice) == 0
 
     # Bob will unstake it
-    liquidstake_contract.endStake(1, stakeId, {'from': bob})
+    stakeIndex = liquidstake_contract.getStakeIndex(stakeId)
+
+    with brownie.reverts('HEX: stakeIdParam not in stake'):
+        liquidstake_contract.endStake(stakeIndex - 1, stakeId, {'from': bob})
+
+    with brownie.reverts('HEX: stakeIndex invalid'):
+        liquidstake_contract.endStake(stakeIndex + 1, stakeId, {'from': bob})
+
+    # We need the correct stakeIndex
+    liquidstake_contract.endStake(stakeIndex, stakeId, {'from': bob})
     assert hex_contract.balanceOf(bob) > 0
 
     chain.mine(5)
@@ -264,7 +275,7 @@ def test_stake_earn_pool_token_exit(hex_contract, uniswap_v1_hex,
 
     # Alice should be able to claim so rewards
     assert hex_contract.balanceOf(alice) == 0
-    #assert rewards_contract.earned(alice) > 0
+    # assert rewards_contract.earned(alice) > 0
     rewards_contract.getReward({'from': alice})
 
     # Alice magically got some HEX!

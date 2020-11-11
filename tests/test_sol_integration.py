@@ -71,7 +71,8 @@ def test_buy_and_stake_hex(hex_contract, uniswap_v1_hex, liquidstake_contract, a
     assert hex_contract.balanceOf(accounts[0]) == 0
     assert liquidstake_contract.ownerOf(stakeId) == accounts[0]
 
-    unstakeTx = liquidstake_contract.endStake(0, stakeId, {'from': accounts[0]})
+    stakeIndex = liquidstake_contract.getStakeIndex(stakeId)
+    unstakeTx = liquidstake_contract.endStake(stakeIndex, stakeId, {'from': accounts[0]})
     assert len(unstakeTx.events['Transfer']) >= 3
     assert len(unstakeTx.events['StakeEnd']) == 1
 
@@ -120,12 +121,13 @@ def test_transfer_stake(hex_contract, uniswap_v1_hex, liquidstake_contract, acco
     liquidstake_contract.transferFrom(alice, bob, stakeId, {'from': alice})
     assert liquidstake_contract.ownerOf(stakeId) == bob
 
+    stakeIndex = liquidstake_contract.getStakeIndex(stakeId)
     with brownie.reverts():
         # alice can no longer endstake
-        unstakeTx = liquidstake_contract.endStake(0, stakeId, {'from': alice})
+        unstakeTx = liquidstake_contract.endStake(stakeIndex, stakeId, {'from': alice})
 
     # but bob can!
-    unstakeTx = liquidstake_contract.endStake(0, stakeId, {'from': bob})
+    unstakeTx = liquidstake_contract.endStake(stakeIndex, stakeId, {'from': bob})
     assert len(unstakeTx.events['Transfer']) >= 3
     assert len(unstakeTx.events['StakeEnd']) == 1
 
