@@ -47,8 +47,8 @@ def dao_contract(LiquidStakeDAO, hex_contract, rewards_contract, liquidstake_con
 
 
 @pytest.fixture(scope="session")
-def pool_mining_contract(LiquidStakePool, hex_contract, dao_contract, liquidstake_contract, accounts):
-    pool = LiquidStakePool.deploy(
+def farm_contract(LiquidStakeFarm, hex_contract, dao_contract, liquidstake_contract, accounts):
+    farm = LiquidStakeFarm.deploy(
             accounts[5],
             accounts[5],
             dao_contract,
@@ -57,11 +57,11 @@ def pool_mining_contract(LiquidStakePool, hex_contract, dao_contract, liquidstak
         )
     totalSupply = dao_contract.balanceOf(accounts[5])
     assert totalSupply > 0
-    dao_contract.transfer(pool, totalSupply, {'from': accounts[5]})
-    pool.notifyRewardAmount(totalSupply, {'from': accounts[5]})
+    dao_contract.transfer(farm, totalSupply, {'from': accounts[5]})
+    farm.notifyRewardAmount(totalSupply, {'from': accounts[5]})
     leftover = dao_contract.balanceOf(accounts[5])
     assert leftover == 0
-    yield pool
+    yield farm
 
 
 def empty_account(erc20, account):
@@ -130,10 +130,10 @@ def test_transfer_and_push_rewards(hex_contract, uniswap_v1_hex, liquidstake_con
     assert hex_contract.balanceOf(rewards_contract) > 0
 
 
-def test_stake_earn_pool_token(hex_contract, uniswap_v1_hex,
-        liquidstake_contract, rewards_contract, pool_mining_contract, accounts,
+def test_stake_and_farm_dao_token(hex_contract, uniswap_v1_hex,
+        liquidstake_contract, rewards_contract, farm_contract, accounts,
         dao_contract, chain):
-    "Alice will stake her LiquidStake to earn some pool tokens"
+    "Alice will stake her LiquidStake to earn some DAO tokens"
 
     alice = accounts[1]
     empty_account(dao_contract, alice)
@@ -162,28 +162,28 @@ def test_stake_earn_pool_token(hex_contract, uniswap_v1_hex,
 
     assert liquidstake_contract.ownerOf(stakeId) == alice
 
-    liquidstake_contract.approve(pool_mining_contract, stakeId, {'from': alice})
-    pool_mining_contract.stake(stakeId, {'from': alice})
+    liquidstake_contract.approve(farm_contract, stakeId, {'from': alice})
+    farm_contract.stake(stakeId, {'from': alice})
 
-    assert liquidstake_contract.ownerOf(stakeId) == pool_mining_contract
-    earned_initial = pool_mining_contract.earned(alice)
+    assert liquidstake_contract.ownerOf(stakeId) == farm_contract
+    earned_initial = farm_contract.earned(alice)
 
     chain.mine(25)
 
-    earned_later = pool_mining_contract.earned(alice)
+    earned_later = farm_contract.earned(alice)
 
     # We should have earned some
     assert earned_later > earned_initial
 
     assert dao_contract.balanceOf(alice) == 0
-    pool_mining_contract.getReward({'from': alice})
+    farm_contract.getReward({'from': alice})
     assert dao_contract.balanceOf(alice) > 0
 
 
-def test_stake_earn_pool_token_exit(hex_contract, uniswap_v1_hex,
-        liquidstake_contract, rewards_contract, pool_mining_contract, accounts,
+def test_stake_and_farm_dao_token_exit(hex_contract, uniswap_v1_hex,
+        liquidstake_contract, rewards_contract, farm_contract, accounts,
         dao_contract, chain):
-    "Alice will stake her LiquidStake to earn some pool tokens"
+    "Alice will stake her LiquidStake to earn some DAO tokens"
 
     alice = accounts[1]
     bob = accounts[2]
@@ -218,23 +218,23 @@ def test_stake_earn_pool_token_exit(hex_contract, uniswap_v1_hex,
 
     assert liquidstake_contract.ownerOf(stakeId) == alice
 
-    liquidstake_contract.approve(pool_mining_contract, stakeId, {'from': alice})
-    pool_mining_contract.stake(stakeId, {'from': alice})
+    liquidstake_contract.approve(farm_contract, stakeId, {'from': alice})
+    farm_contract.stake(stakeId, {'from': alice})
 
-    assert liquidstake_contract.ownerOf(stakeId) == pool_mining_contract
-    earned_initial = pool_mining_contract.earned(alice)
+    assert liquidstake_contract.ownerOf(stakeId) == farm_contract
+    earned_initial = farm_contract.earned(alice)
 
     chain.mine(25)
 
-    earned_later = pool_mining_contract.earned(alice)
+    earned_later = farm_contract.earned(alice)
 
     # We should have earned some
     assert earned_later > earned_initial
 
     assert dao_contract.balanceOf(alice) == 0
-    pool_mining_contract.exit({'from': alice})
+    farm_contract.exit({'from': alice})
 
-    # After exiting the pool_mining_contract, alice should have some DAO tokens and
+    # After exiting the farm_contract, alice should have some DAO tokens and
     # her NFT back
     dao_amt = dao_contract.balanceOf(alice)
     assert dao_amt > 0

@@ -14,7 +14,7 @@ import "./RewardsDistributionRecipient.sol";
 import "./Pausable.sol";
 
 
-contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipient, ReentrancyGuard, Pausable {
+contract LiquidStakeFarm is LiquidStakeTokenWrapper, RewardsDistributionRecipient, ReentrancyGuard, Pausable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
