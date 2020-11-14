@@ -99,26 +99,6 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
     }
 
     */
-    function notifyRewardAmount(uint256 reward) external onlyRewardsDistribution updateReward(address(0)) {
-        if (block.timestamp >= periodFinish) {
-            rewardRate = reward.div(rewardsDuration);
-        } else {
-            uint256 remaining = periodFinish.sub(block.timestamp);
-            uint256 leftover = remaining.mul(rewardRate);
-            rewardRate = reward.add(leftover).div(rewardsDuration);
-        }
-
-        // Ensure the provided reward amount is not more than the balance in the contract.
-        // This keeps the reward rate in the right range, preventing overflows due to
-        // very high values of rewardRate in the earned and rewardsPerToken functions;
-        // Reward + leftover must be less than 2^256 / 10^18 to avoid overflow.
-        uint balance = rewardsToken.balanceOf(address(this));
-        require(rewardRate <= balance.div(rewardsDuration), "Provided reward too high");
-
-        lastUpdateTime = block.timestamp;
-        periodFinish = block.timestamp.add(rewardsDuration);
-        emit RewardAdded(reward);
-    }
 
     // Added to support recovering LP Rewards from other systems such as BAL to be distributed to holders
     function recoverERC20(address tokenAddress, uint256 tokenAmount) external onlyOwner {
@@ -133,6 +113,7 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         emit Recovered(tokenAddress, tokenAmount);
     }
 
+/*
     function setRewardsDuration(uint256 _rewardsDuration) external onlyOwner {
         require(block.timestamp > periodFinish,
             "Previous rewards period must be complete before changing the duration for the new period"
@@ -140,7 +121,7 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         rewardsDuration = _rewardsDuration;
         emit RewardsDurationUpdated(rewardsDuration);
     }
-/*
+
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
         lastUpdateTime = lastTimeRewardApplicable();
@@ -170,7 +151,7 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
 
 
 
-    // IERC20 public safe = IERC20(0x1Aa61c196E76805fcBe394eA00e4fFCEd24FC469);
+
     uint256 public constant DURATION = 7 days;
 
     uint256 public initreward = 10000*1e18;
@@ -197,7 +178,6 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         }
         _;
     }
-
 
     function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
@@ -226,13 +206,13 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
     }
 
     // stake visibility is public as overriding LiquidStakeTokenWrapper's stake() function
-    function stake(uint256 tokenId) public updateReward(msg.sender) checkhalve checkStart{ 
+    function stake(uint256 tokenId) public updateReward(msg.sender) checkHalvening checkStart{ 
         require(tokenId >= 0, "token id must be >= 0");
         stakeToken(tokenId);
         emit Staked(msg.sender, tokenId);
     }
 
-    function stakeMultiple(uint256[] memory tokenIds) public updateReward(msg.sender) checkhalve checkStart{ 
+    function stakeMultiple(uint256[] memory tokenIds) public updateReward(msg.sender) checkHalvening checkStart{ 
         for (uint i = 0; i < tokenIds.length; i++) {
             require(tokenIds[i] >= 0, "token id must be >= 0");
             super.stakeToken(tokenIds[i]);
@@ -240,14 +220,14 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         }
     }
 
-    function withdraw(uint256 tokenId) public updateReward(msg.sender) checkhalve checkStart{
+    function withdraw(uint256 tokenId) public updateReward(msg.sender) checkHalvening checkStart{
         require(tokenId >= 0, "token id must be >= 0");
-        require(numStaked(msg.sender) > 0, "no ynfts staked");
+        require(numStaked(msg.sender) > 0, "no nfts staked");
         super.withdrawToken(tokenId);
         emit Withdrawn(msg.sender, tokenId);
     }
 
-    function withdrawMultiple(uint256[] memory tokenIds) public updateReward(msg.sender) checkhalve checkStart{
+    function withdrawMultiple(uint256[] memory tokenIds) public updateReward(msg.sender) checkHalvening checkStart{
         for (uint i = 0; i < tokenIds.length; i++) {
             require(tokenIds[i] >= 0, "token id must be >= 0");
             super.withdrawToken(tokenIds[i]);
@@ -255,8 +235,8 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         }
     }
 
-    function withdrawAll() public updateReward(msg.sender) checkhalve checkStart {
-        require(numStaked(msg.sender) > 0, "no ynfts staked");
+    function withdrawAll() public updateReward(msg.sender) checkHalvening checkStart {
+        require(numStaked(msg.sender) > 0, "no nfts staked");
         super.withdrawAll();
         emit WithdrawnAll(msg.sender);
     }
@@ -266,7 +246,7 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         getReward();
     }
 
-    function getReward() public updateReward(msg.sender) checkhalve checkStart {
+    function getReward() public updateReward(msg.sender) checkHalvening checkStart {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
@@ -275,10 +255,10 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         }
     }
 
-    modifier checkhalve(){
+    modifier checkHalvening() {
         if (block.timestamp >= periodFinish) {
-            initreward = initreward.mul(50).div(100); 
-            // TODO safe.mint(address(this),initreward);
+            initreward = initreward.mul(50).div(100);
+            // rewardsToken.mint(address(this), initreward);
 
             rewardRate = initreward.div(DURATION);
             periodFinish = block.timestamp.add(DURATION);
@@ -287,28 +267,21 @@ contract LiquidStakePool is LiquidStakeTokenWrapper, RewardsDistributionRecipien
         _;
     }
 
-    modifier checkStart(){
-        require(block.timestamp > starttime,"not start");
+    modifier checkStart() {
+        require(block.timestamp > starttime, "not start");
         _;
     }
 
-    /*
     function notifyRewardAmount(uint256 reward)
         external
         onlyRewardsDistribution
         updateReward(address(0))
     {
-        if (block.timestamp >= periodFinish) {
-            rewardRate = reward.div(DURATION);
-        } else {
-            uint256 remaining = periodFinish.sub(block.timestamp);
-            uint256 leftover = remaining.mul(rewardRate);
-            rewardRate = reward.add(leftover).div(DURATION);
-        }
-        // TODO safe.mint(address(this),reward);
-        lastUpdateTime = block.timestamp;
+        require(block.timestamp >= periodFinish);
+        initreward = reward.mul(50).div(100);
+        rewardRate = initreward.div(DURATION);
         periodFinish = block.timestamp.add(DURATION);
-        emit RewardAdded(reward);
+        rewardsDistribution = address(0);
+        emit RewardAdded(initreward);
     }
-    */
 }
