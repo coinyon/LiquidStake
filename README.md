@@ -5,6 +5,10 @@ Basically this allows you to stake HEX with the contract and get a LiquidStake
 NFT for that. The nice thing is that the Token ID of this NFT equals the HEX
 Stake ID.
 
+The code for this is minimal and can fit on a single screen: [LiquidStake.sol](./contracts/LiquidStake.sol)
+
+You can get a good understanding of this by reading the [test case](tests/test_integration.py#85).
+
 ## Main Contract Goals
 
 * No admin key
