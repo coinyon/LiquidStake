@@ -7,7 +7,7 @@ Stake ID.
 
 The code for this is minimal and can fit on a single screen: [LiquidStake.sol](./contracts/LiquidStake.sol)
 
-You can get a good understanding of this by reading the [test case](tests/test_integration.py#85).
+You can get a good understanding of this by reading the [test case](./tests/test_integration.py#85).
 
 ## Main Contract Goals
 
