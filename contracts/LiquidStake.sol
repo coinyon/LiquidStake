@@ -6,7 +6,7 @@ import 'interfaces/IHEX.sol';
 import 'interfaces/IStakingRewards.sol';
 import 'interfaces/IRewardDistributionRecipient.sol';
 
-contract LiquidStakeSolidity is ERC721 {
+contract LiquidStake is ERC721 {
     IHEX hex_contract;
     address immutable rewards;
     address immutable owner;
