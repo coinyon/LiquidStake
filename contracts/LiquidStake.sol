@@ -9,19 +9,13 @@ import 'interfaces/IRewardDistributionRecipient.sol';
 contract LiquidStake is ERC721 {
     IHEX hex_contract;
     address immutable rewards;
-    address immutable owner;
 
     constructor(string memory name, string memory symbol, address hex_address, address rewards_address)
         ERC721(name, symbol)
         public
     {
         hex_contract = IHEX(hex_address);
-        owner = msg.sender;
         rewards = rewards_address;
-    }
-
-    modifier restricted() {
-        if (msg.sender == owner) _;
     }
 
     function getStakeIndex(uint256 _stakeId) public view returns (uint40) {
