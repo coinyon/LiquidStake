@@ -36,3 +36,11 @@ still able to get an advantage.
 Run tests like this:
 
     brownie test --network mainnet-fork
+
+## Deploy
+
+**NOTE: THIS IS A PROTOTYPE AND BASICALLY AN PROGRAMMING EXERCISE AND NOT MEANT TO BE DEPLOYED.**
+
+Deploy like this:
+
+    brownie run scripts/deploy.py
