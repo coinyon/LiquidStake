@@ -1,4 +1,4 @@
-# LiquidStakeDAO
+# LiquidStake
 
 Liquid (transferable) stakes for HEX with optional shared reward pool.
 Basically this allows you to stake HEX with the contract and get a LiquidStake
