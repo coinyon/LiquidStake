@@ -5,9 +5,11 @@ Basically this allows you to stake HEX with the contract and get a LiquidStake
 NFT for that. The nice thing is that the Token ID of this NFT equals the HEX
 Stake ID.
 
-The code for this is minimal and can fit on a single screen: [LiquidStake.sol](./contracts/LiquidStake.sol)
+The code for this is minimal and can fit on a single screen:
+[LiquidStake.sol](./contracts/LiquidStake.sol)
 
-You can get a good understanding of this by reading the [test case](./tests/test_integration.py#L85).
+You can get a good understanding of this by reading the [test
+case](./tests/test_integration.py#L85).
 
 ## Main Contract Goals
 
@@ -15,6 +17,19 @@ You can get a good understanding of this by reading the [test case](./tests/test
 * Unstoppable, unpausable, no governance functionality
 * Test suite
 * Audited (post-launch by donations?)
+
+## Benefits of LiquidStakes
+
+* Can be gifted
+* Can be inherited
+* Can be moved in case your wallet got compromised
+* Tradeable on secondary markets (not necessarily a benefit for HEX stakers?)
+* Can be borrowed against (in theory)
+* It's like a HEX bond and facilitates HEX yield curves by market pricing of
+  short term stakes vs long term stakes
+* Can be generally used in other DeFi protocols which will increase adoption
+  and solidifies HEX market position via network effects (see Protocol Sink
+  Thesis)
 
 ## Optional Rewards Pool
 
@@ -39,7 +54,8 @@ Run tests like this:
 
 ## Deploy
 
-**NOTE: THIS IS A PROTOTYPE AND BASICALLY A PROGRAMMING EXERCISE AND NOT MEANT TO BE DEPLOYED.**
+**NOTE: THIS IS A PROTOTYPE AND BASICALLY A PROGRAMMING EXERCISE AND NOT MEANT
+TO BE DEPLOYED.**
 
 Deploy like this:
 
